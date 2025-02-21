@@ -1,0 +1,44 @@
+- name: Send POST request using uri module
+  ansible.builtin.uri:
+    url: "http://98.80.168.118:8000/v1/completions"
+    method: POST
+    headers:
+      accept: "application/json"
+      Content-Type: "application/json"
+      Authorization: "Bearer {{ api_token }}"
+    body:
+      prompt: "{{ gpt_prompt | default('What is the capital of the USA?') }}"
+      max_tokens: "{{ max_tokens | default('500') }}"
+    body_format: json
+    return_content: true
+    status_code: 200
+    timeout: 60
+  register: response
+
+- name: Check if response is JSON and debug output
+  ansible.builtin.debug:
+    msg: "{{ response.json if response.json is defined else response.content }}"
+
+- name: Check if response is JSON and retrieve model name
+  ansible.builtin.debug:
+    msg: "{{ response.json.model | basename if response.json is defined else 'Model not found' }}"
+
+- name: Check if response is JSON and retrieve text
+  ansible.builtin.debug:
+    msg: "{{ response.json.choices[0].text if response.json is defined and response.json.choices is defined else 'Text not found' }}"
+
+- name: Send notification message via Mattermost
+  community.general.mattermost:
+    url: "{{ mattermost_url }}"
+    api_key: "{{ mattermost_api_key }}"
+    attachments:
+      - text: "data model {{ response.json.model | basename if response.json is defined else 'Model not found' }}"
+        color: '#37a3a3'
+        title: Ansible + InstructLab Information
+        fields:
+          - title: Ansible Prompt
+            value: "{{ gpt_prompt | default('What is the capital of the USA?') }}"
+            short: true
+          - title: InstructLab AI provided information
+            value: "{{ response.json.choices[0].text if response.json is defined and response.json.choices is defined else 'Text not found' }}"
+            short: true
