@@ -43,11 +43,6 @@
     dest: "/tmp/home/ai/lightspeed-response.yml"
     mode: '0644'
 
-- name: Publish the changes
-  ansible.scm.git_publish:
-    path: "{{ repository['path'] }}"
-    token: "{{ github_token }}"
-
 - name: Update git repo with backup
   ansible.builtin.shell: git add -A && git commit -m "Synching new Lightspeed playbook" && git config --global core.sshCommand 'ssh -i {{ cert_key_file }} -F /dev/null'
     && git push
