@@ -1,0 +1,12 @@
+-   name: Remove line from a file if it exists
+    hosts: nodes
+    tasks:
+    -   name: Remove a line from a file if it exists
+        ansible.builtin.lineinfile:
+            path: /etc/httpd/conf/httpd.conf
+            regexp: InvalidDirectiveHere
+            state: absent
+    -   name: Restart httpd
+        ansible.builtin.service:
+            name: httpd
+            state: restarted
