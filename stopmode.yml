@@ -1,0 +1,7 @@
+---
+- name: Stop Model
+  hosts: ai.shadowman.dev
+  gather_facts: false
+
+  roles:
+    - stop_granite

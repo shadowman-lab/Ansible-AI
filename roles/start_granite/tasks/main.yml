@@ -1,0 +1,37 @@
+---
+- name: Check if InstructLab is already running
+  block:
+    - name: Check if something is listening on port 8000 for TCP
+      ansible.builtin.wait_for:
+        host: 0.0.0.0
+        port: 8000
+        state: started
+        timeout: 5
+      register: port_check
+
+  rescue:
+    - name: Activate virtual environment and run model serve in background
+      ansible.builtin.shell: |
+        nohup /home/ec2-user/instructlab/venv/bin/ilab model serve --model-path /home/ec2-user/instructlab/models/granite-7b-lab-Q4_K_M.gguf --api-key {{ api_token | default('ansible123!') }} > /tmp/ilab_model_serve.log 2>&1 &
+      async: 5
+      poll: 0
+      register: model_serve_command
+
+    - name: Check if something is listening on port 8000 for TCP
+      ansible.builtin.wait_for:
+        host: 0.0.0.0
+        port: 8000
+        state: started
+        timeout: 30
+      register: port_check
+      until: port_check is not failed
+
+    - name: Confirm that model serve started successfully
+      ansible.builtin.debug:
+        msg: "Model serve started successfully and is listening on port 8000"
+      when: port_check is succeeded
+
+    - name: Handle error if port 8000 is not listening
+      ansible.builtin.fail:
+        msg: "Model serve did not start successfully; nothing is listening on port 8000"
+      when: port_check is failed

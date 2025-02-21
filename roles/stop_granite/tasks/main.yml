@@ -1,0 +1,38 @@
+---
+- name: Check if InstructLab is already running
+  block:
+    - name: Check if something is listening on port 8000 for TCP
+      ansible.builtin.wait_for:
+        host: 0.0.0.0
+        port: 8000
+        state: absent
+        timeout: 5
+      register: port_check
+  rescue:
+    - name: Check for instructlab process
+      ansible.builtin.shell: "pgrep -f instructlab"
+      register: instructlab_pid
+      ignore_errors: true
+
+    - name: Kill instructlab process
+      ansible.builtin.shell: "kill -9 {{ instructlab_pid.stdout }}"
+      when: instructlab_pid.stdout is defined and instructlab_pid.stdout != ""
+      ignore_errors: true
+      register: kill_result
+
+    - name: Display result
+      ansible.builtin.debug:
+        msg: "Process 'instructlab' {{ 'was killed' if kill_result is succeeded else 'not found or could not be killed' }}"
+
+    - name: Check if something is listening on port 8000 for TCP
+      ansible.builtin.wait_for:
+        host: 0.0.0.0
+        port: 8000
+        state: absent
+        timeout: 5
+      register: port_check
+
+    - name: Confirm that model serve started successfully
+      ansible.builtin.debug:
+        msg: "instructlab stopped successfully, nothing is listening on port 8000"
+      when: port_check is succeeded

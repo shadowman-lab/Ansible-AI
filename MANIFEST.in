@@ -1,0 +1,7 @@
+include README.md
+include .gitignore
+include *.yml
+include .vscode/extensions.json
+include devfile.yaml
+recursive-exclude .git *
+recursive-include roles *
