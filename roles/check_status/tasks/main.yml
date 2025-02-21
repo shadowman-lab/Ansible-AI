@@ -1,38 +1,38 @@
 ---
-- name: Check if httpd is running
+- name: Check if service is running
   check_mode: true
   ansible.builtin.systemd_service:
     state: started
     name: "{{ service_issue }}"
   register: service_status
 
-- name: Check if httpd is running
+- name: Check if service is running
   ansible.builtin.debug:
     msg: "{{ service_status }}"
 
-- name: Check if httpd is running
+- name: Check if service is running
   ansible.builtin.debug:
     msg: "{{ service_status.status.ActiveState if service_status.status.ActiveState is defined else 'ActiveState not found' }}"
 
-- name: Retrieve last 50 lines of httpd logs
+- name: Retrieve last 50 lines of service logs
   ansible.builtin.command: journalctl -u {{ service_issue }}.service -n 20
-  register: httpd_logs
+  register: service_logs
   ignore_errors: true
   when: service_status.changed
 
-- name: Store httpd logs as a variable
+- name: Store service logs as a variable
   ansible.builtin.set_fact:
-    httpd_log_output: "{{ httpd_logs.stdout }}"
+    service_log_output: "{{ service_logs.stdout }}"
   when: service_status.changed
 
-- name: Display httpd logs
+- name: Display service logs
   ansible.builtin.debug:
-    msg: "{{ httpd_log_output }}"
+    msg: "{{ service_log_output }}"
   when: service_status.changed
 
 - name: Set stats for next controller job
   ansible.builtin.set_stats:
     data:
-      gpt_prompt: "\n\n### Instructions:\nWe have an issue on our RHEL Linux server with the Apache service. Please help me troubleshoot this issue. Here are recent error logs: {{ httpd_log_output }} \n\n### Response:\n"
+      gpt_prompt: "\n\n### Instructions:\nWe have an issue on our RHEL Linux server with the {{ service_issue }} service. Please help me troubleshoot this issue. Here are recent error logs: {{ service_log_output }} \n\n### Response:\n"
       max_tokens: 2000
   when: service_status.changed
