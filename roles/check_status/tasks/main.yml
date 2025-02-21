@@ -3,7 +3,7 @@
   check_mode: true
   ansible.builtin.systemd_service:
     state: started
-    name: httpd
+    name: "{{ service_issue }}"
   register: service_status
 
 - name: Check if httpd is running
@@ -15,7 +15,7 @@
     msg: "{{ service_status.status.ActiveState if service_status.status.ActiveState is defined else 'ActiveState not found' }}"
 
 - name: Retrieve last 50 lines of httpd logs
-  ansible.builtin.command: journalctl -u httpd.service -n 20
+  ansible.builtin.command: journalctl -u {{ service_issue }}.service -n 20
   register: httpd_logs
   ignore_errors: true
   when: service_status.changed
