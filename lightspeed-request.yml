@@ -1,0 +1,7 @@
+---
+- name: Interact with Ansible Lightspeed API
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - lightspeed_api

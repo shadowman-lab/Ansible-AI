@@ -1,0 +1,64 @@
+---
+- name: Send request to AI API
+  ansible.builtin.uri:
+    url: "https://c.ai.ansible.redhat.com/api/v0/ai/generations/"
+    method: POST
+    headers:
+      Content-Type: "application/json"
+      Authorization: "Bearer {{ lightspeed_token }}"
+    body_format: json
+    body:
+      text: "{{ lightspeed_prompt }}"
+  register: response
+
+- name: Display API response
+  ansible.builtin.debug:
+    msg: "{{ response.json }}"
+
+- name: Set fact for Ansible Lightspeed generated playbook
+  ansible.builtin.set_fact:
+    lightspeed_playbook: "{{ response.json.playbook | from_yaml }}"
+
+- name: Display Ansible Playbook in JSON
+  ansible.builtin.debug:
+    msg: "{{ lightspeed_playbook }}"
+
+- name: Display Ansible Playbook in YAML
+  ansible.builtin.debug:
+    msg: "{{ lightspeed_playbook | to_nice_yaml(sort_keys=False) }}"
+
+- name: Sync with Gitrepo
+  ansible.builtin.git:
+    repo: git@github.com:shadowman-lab/Ansible-AI.git
+    dest: /tmp/home/ai
+    version: main
+    accept_newhostkey: true
+    key_file: "{{ cert_key_file }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: Save formatted YAML response to file
+  ansible.builtin.copy:
+    content: "{{ lightspeed_playbook | to_nice_yaml(sort_keys=False) }}"
+    dest: "/tmp/home/ai/lightspeed-response.yml"
+    mode: '0644'
+
+- name: Publish the changes
+  ansible.scm.git_publish:
+    path: "{{ repository['path'] }}"
+    token: "{{ github_token }}"
+
+- name: Update git repo with backup
+  ansible.builtin.shell: git add -A && git commit -m "Synching new Lightspeed playbook" && git config --global core.sshCommand 'ssh -i {{ cert_key_file }} -F /dev/null'
+    && git push
+  args:
+    chdir: /tmp/home/ai
+  environment:
+    GIT_COMMITTER_NAME: "{{ git_name | default(omit) }}"
+    GIT_COMMITTER_EMAIL: "{{ git_email | default(omit) }}"
+    GIT_AUTHOR_NAME: "{{ git_name | default(omit) }}"
+    GIT_AUTHOR_EMAIL: "{{ git_email | default(omit) }}"
+  run_once: true
+  register: gitresult
+  failed_when: gitresult.rc > 1
+  changed_when: gitresult.rc == 0
