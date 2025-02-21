@@ -23,13 +23,16 @@
 - name: Store httpd logs as a variable
   ansible.builtin.set_fact:
     httpd_log_output: "{{ httpd_logs.stdout }}"
+  when: service_status.changed
 
 - name: Display httpd logs
   ansible.builtin.debug:
     msg: "{{ httpd_log_output }}"
+  when: service_status.changed
 
 - name: Set stats for next controller job
   ansible.builtin.set_stats:
     data:
       gpt_prompt: "\n\n### Instructions:\nWe have an issue on our RHEL Linux server with the Apache service. Please help me troubleshoot this issue. Here are recent error logs: {{ httpd_log_output }} \n\n### Response:\n"
       max_tokens: 2000
+  when: service_status.changed
