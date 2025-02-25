@@ -1,11 +1,12 @@
--   name: remove line in file
+-   name: correct the configuration files
     hosts: datadog.shadowman.dev
     tasks:
-    -   name: remove a line from a file
+    -   name: correct the configuration files
         ansible.builtin.lineinfile:
             path: /etc/httpd/conf/httpd.conf
-            regexp: InvalidDirectiveHere
-            state: absent
+            line: ErrorLog /var/log/httpd/error_log
+            regexp: ^ErrorLog.*$
+            state: present
     -   name: restart httpd
         ansible.builtin.service:
             name: httpd
