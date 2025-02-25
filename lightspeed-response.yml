@@ -1,6 +1,11 @@
--   name: fix config
-    hosts: datadog
+-   name: remove line in file
+    hosts: datadog.shadowman.dev
     tasks:
+    -   name: remove a line from a file
+        ansible.builtin.lineinfile:
+            path: /etc/httpd/conf/httpd.conf
+            regexp: InvalidDirectiveHere
+            state: absent
     -   name: restart httpd
         ansible.builtin.service:
             name: httpd
