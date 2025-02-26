@@ -43,7 +43,7 @@
     dest: "/tmp/home/ai/lightspeed-response.yml"
     mode: '0644'
 
-- name: Update git repo with backup
+- name: Update git repo with resolution playbook
   ansible.builtin.shell: git add -A && git commit -m "Synching new Lightspeed playbook" && git config --global core.sshCommand 'ssh -i {{ cert_key_file }} -F /dev/null'
     && git push
   args:
