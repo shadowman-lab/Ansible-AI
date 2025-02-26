@@ -31,7 +31,7 @@
   ansible.builtin.set_stats:
     data:
       lightspeed_prompt: "copy files/httpd.conf to /etc/httpd/conf/httpd.conf and restart httpd"
-  when: response.json is defined and response.json.choices is defined and /etc/httpd/conf/httpd.conf in response.json.choices[0].text
+  when: response.json is defined and response.json.choices is defined and '/etc/httpd/conf/httpd.conf' in response.json.choices[0].text
 
 - name: Send notification message via Mattermost
   community.general.mattermost:
