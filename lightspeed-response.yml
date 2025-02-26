@@ -1,5 +1,5 @@
--   name: correct spelling error
-    hosts: datadog.shadowman.dev
+-   name: correct syntax error
+    hosts: datadog
     tasks:
     -   name: restart httpd
         ansible.builtin.service:
