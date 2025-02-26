@@ -27,6 +27,12 @@
   ansible.builtin.debug:
     msg: "{{ response.json.choices[0].text if response.json is defined and response.json.choices is defined else 'Text not found' }}"
 
+- name: Pass lightspeed_prompt
+  ansible.builtin.set_stats:
+    data:
+      lightspeed_prompt:
+  when: response.json is defined and response.json.choices is defined and /etc/httpd/conf/httpd.conf in response.json.choices[0].text
+
 - name: Send notification message via Mattermost
   community.general.mattermost:
     url: "{{ mattermost_url }}"
