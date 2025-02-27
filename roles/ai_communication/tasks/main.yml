@@ -48,3 +48,25 @@
           - title: InstructLab AI provided information
             value: "{{ response.json.choices[0].text if response.json is defined and response.json.choices is defined else 'Text not found' }}"
             short: true
+
+- name: Create an incident in ServiceNow
+  servicenow.itsm.incident:
+    state: new
+    description: A {{ service_issue }} incident has occurred on with AI determining the root cause to be {{ response.json.choices[0].text if response.json is defined and response.json.choices is defined }}
+    short_description: A {{ service_issue }} incident has been detected on {{ vm_name }}
+    caller: admin
+    urgency: medium
+    impact: high
+    other:
+      u_vm_name: "{{ vm_name | default(omit) }}"
+  register: new_incident
+  delegate_to: localhost
+
+- name: Display incident number
+  ansible.builtin.debug:
+    var: new_incident.record.number
+
+- name: Pass incident number
+  ansible.builtin.set_stats:
+    data:
+      ticket_number: "{{ new_incident.record.number }}"
