@@ -1,5 +1,5 @@
 -   name: fix and restart httpd
-    hosts: datadog.shadowman.dev
+    hosts: datadog
     tasks:
     -   name: fix and restart httpd
         ansible.builtin.lineinfile:
@@ -8,5 +8,5 @@
             state: absent
     -   name: restart httpd
         ansible.builtin.service:
-            name: httpd
+            name: httpd.service
             state: restarted
