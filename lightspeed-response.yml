@@ -1,6 +1,12 @@
--   name: fix and restart
+-   name: fix and restart httpd
     hosts: datadog.shadowman.dev
     tasks:
-    -   name: fix and restart
-        ansible.builtin.debug:
-            msg: fixed and restarting
+    -   name: fix and restart httpd
+        ansible.builtin.lineinfile:
+            path: /etc/httpd/conf/httpd.conf
+            regexp: ^\s*InvalidDirectiveHere
+            state: absent
+    -   name: restart httpd
+        ansible.builtin.service:
+            name: httpd
+            state: restarted
