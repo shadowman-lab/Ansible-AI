@@ -30,7 +30,7 @@
 - name: Pass lightspeed_prompt
   ansible.builtin.set_stats:
     data:
-      lightspeed_prompt: "Create a playbook to fix and restart the {{ service_issue }} service: {{ response.json.choices[0].text }}"
+      lightspeed_prompt: "Create a playbook to fix and restart the {{ service_issue }} service on host {{ vm_name }}: {{ response.json.choices[0].text }}"
   when: response.json is defined and response.json.choices is defined
 
 - name: Send notification message via Mattermost

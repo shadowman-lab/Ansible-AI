@@ -8,7 +8,7 @@
       Authorization: "Bearer {{ lightspeed_token }}"
     body_format: json
     body:
-      text: "{{ lightspeed_prompt }} on host {{ vm_name }}"
+      text: "{{ lightspeed_prompt }}"
   register: response
 
 - name: Display API response
