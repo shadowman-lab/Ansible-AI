@@ -30,8 +30,8 @@
 - name: Pass lightspeed_prompt
   ansible.builtin.set_stats:
     data:
-      lightspeed_prompt: "Copy files/httpd.conf to /etc/httpd/conf/httpd.conf and restart httpd service"
-  when: response.json is defined and response.json.choices is defined and '/etc/httpd/conf/httpd.conf' in response.json.choices[0].text
+      lightspeed_prompt: "Create a playbook to fix and restart the {{ service_issue }} service: {{ response.json.choices[0].text }}"
+  when: response.json is defined and response.json.choices is defined
 
 - name: Send notification message via Mattermost
   community.general.mattermost:
