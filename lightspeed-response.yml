@@ -1,12 +1,11 @@
--   name: fix and restart httpd
+-   name: copy httpd.conf file
     hosts: datadog.shadowman.dev
     tasks:
-    -   name: fix httpd
-        ansible.builtin.replace:
-            path: /etc/httpd/conf/httpd.conf
-            regexp: (Syntax error on line [0-9]*. Apache is not running.)
-            replace: ''
-    -   name: restart httpd
+    -   name: copy httpd.conf file
+        ansible.builtin.copy:
+            src: files/httpd.conf
+            dest: /etc/httpd/conf/httpd.conf
+    -   name: restart httpd service
         ansible.builtin.service:
             name: httpd
             state: restarted
