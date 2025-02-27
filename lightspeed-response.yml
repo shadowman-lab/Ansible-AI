@@ -1,12 +1,17 @@
 -   name: fix and restart httpd
     hosts: datadog.shadowman.dev
     tasks:
-    -   name: fix and restart httpd
+    -   name: fix httpd
         ansible.builtin.lineinfile:
             path: /etc/httpd/conf/httpd.conf
-            regexp: ^\s*InvalidDirectiveHere
-            state: absent
+            regexp: ^\s*CustomLog\s+.*\s+common\s*$
+            line: CustomLog /var/log/httpd/access_log common
+    -   name: fix httpd
+        ansible.builtin.lineinfile:
+            path: /etc/httpd/conf/httpd.conf
+            regexp: ^\s*LogFormat\s+.*\s+common\s*$
+            line: LogFormat "%h %l %u %t \"%r\" %>s %b" common
     -   name: restart httpd
         ansible.builtin.service:
-            name: httpd.service
+            name: httpd
             state: restarted
