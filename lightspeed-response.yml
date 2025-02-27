@@ -1,11 +1,8 @@
--   name: copy httpd.conf file
+-   name: Fix the httpd service
     hosts: datadog.shadowman.dev
     tasks:
-    -   name: copy httpd.conf file
-        ansible.builtin.copy:
-            src: files/httpd.conf
-            dest: /etc/httpd/conf/httpd.conf
-    -   name: restart httpd service
-        ansible.builtin.service:
-            name: httpd
-            state: restarted
+    -   name: Fix the httpd service
+        ansible.builtin.replace:
+            path: /etc/httpd/conf/httpd.conf
+            regexp: ^(\s+)(InvalidDirectiveHere)(\s+.*)$
+            replace: \1\2\3
