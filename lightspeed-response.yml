@@ -1,8 +1,6 @@
--   name: Fix the httpd service
+-   name: fix and restart
     hosts: datadog.shadowman.dev
     tasks:
-    -   name: Fix the httpd service
-        ansible.builtin.replace:
-            path: /etc/httpd/conf/httpd.conf
-            regexp: ^(\s+)(InvalidDirectiveHere)(\s+.*)$
-            replace: \1\2\3
+    -   name: fix and restart
+        ansible.builtin.debug:
+            msg: fixed and restarting
