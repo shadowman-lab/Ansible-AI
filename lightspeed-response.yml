@@ -2,15 +2,10 @@
     hosts: datadog.shadowman.dev
     tasks:
     -   name: fix httpd
-        ansible.builtin.lineinfile:
+        ansible.builtin.replace:
             path: /etc/httpd/conf/httpd.conf
-            regexp: ^\s*CustomLog\s+.*\s+common\s*$
-            line: CustomLog /var/log/httpd/access_log common
-    -   name: fix httpd
-        ansible.builtin.lineinfile:
-            path: /etc/httpd/conf/httpd.conf
-            regexp: ^\s*LogFormat\s+.*\s+common\s*$
-            line: LogFormat "%h %l %u %t \"%r\" %>s %b" common
+            regexp: (Syntax error on line [0-9]*. Apache is not running.)
+            replace: ''
     -   name: restart httpd
         ansible.builtin.service:
             name: httpd
