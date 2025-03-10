@@ -1,7 +1,7 @@
-- name: copy httpd.conf file
-  hosts: datadog.shadowman.dev
-
-  tasks:
-    - name: do nothing
-      ansible.builtin.debug:
-        msg: "hi"
+-   name: copy httpd.conf file
+    hosts: datadog.shadowman.dev
+    tasks:
+    -   name: copy httpd.conf
+        ansible.builtin.copy:
+            src: files/httpd.conf
+            dest: /etc/httpd/conf/httpd.confg
