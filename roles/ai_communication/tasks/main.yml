@@ -1,3 +1,4 @@
+---
 - name: Send POST request using uri module
   ansible.builtin.uri:
     url: "{{ ai_url }}/v1/completions"
