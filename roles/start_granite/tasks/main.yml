@@ -1,22 +1,13 @@
 ---
 - name: Check if InstructLab is already running
   block:
-    - name: Send POST request using uri module
-      ansible.builtin.uri:
-        url: "{{ ai_url }}/v1/completions"
-        method: POST
-        headers:
-          accept: "application/json"
-          Content-Type: "application/json"
-          Authorization: "Bearer {{ api_token }}"
-        body:
-          prompt: "{{ gpt_prompt | default('What is the capital of the USA?') }}"
-          max_tokens: "{{ max_tokens | default('500') }}"
-        body_format: json
-        return_content: true
-        status_code: 200
-        timeout: 60
-      register: response
+    - name: Check if something is listening on port 8000 for TCP
+      ansible.builtin.wait_for:
+        host: 0.0.0.0
+        port: 8000
+        state: started
+        timeout: 5
+      register: port_check
 
   rescue:
     - name: Activate virtual environment and run model serve in background
