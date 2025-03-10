@@ -35,7 +35,7 @@
 - name: Pass lightspeed_prompt
   ansible.builtin.set_stats:
     data:
-      lightspeed_prompt: "Copy files/httpd.conf to /etc/httpd/conf/httpd.conf and restart httpd service"
+      lightspeed_prompt: "Copy files/{{ service_config }} to {{ service_config }} location and restart {{ service_issue }} service"
   when: response.json is defined and response.json.choices is defined and service_config in response.json.choices[0].text
 
 - name: Send notification message via Mattermost
