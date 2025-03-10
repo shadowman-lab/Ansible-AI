@@ -1,6 +1,6 @@
 - name: Send POST request using uri module
   ansible.builtin.uri:
-    url: "http://98.80.168.118:8000/v1/completions"
+    url: "{{ ai_url }}/v1/completions"
     method: POST
     headers:
       accept: "application/json"
