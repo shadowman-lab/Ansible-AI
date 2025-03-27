@@ -34,5 +34,6 @@
   ansible.builtin.set_stats:
     data:
       gpt_prompt: "\n\n### Instructions:\nI would like a summary of the root cause of an issue on our RHEL Linux server with the {{ service_issue }} service. Here are recent error logs: {{ service_log_output }} \n\n### Response:\n"
+      service_log_output: "{{ service_logs.stdout }}"
       max_tokens: 2000
   when: service_status.changed

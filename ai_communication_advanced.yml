@@ -1,0 +1,7 @@
+---
+- name: Check with AI
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - ai_communication_advanced

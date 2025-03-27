@@ -1,0 +1,170 @@
+---
+- name: Send POST request using uri module to get if automated response is possible
+  ansible.builtin.uri:
+    url: "{{ ai_url }}/v1/chat/completions"
+    method: POST
+    headers:
+      accept: "application/json"
+      Content-Type: "application/json"
+      Authorization: "Bearer {{ api_token }}"
+    body:
+      response_format:
+        type: json_object
+      messages:
+        - 'role': 'system'
+          'content': '{{ automated_prompt }}'
+        - 'role': 'user'
+          'content': '{{ service_log_output }}'
+      max_tokens: "{{ max_tokens | default('500') }}"
+      temperature: 0
+    body_format: json
+    return_content: true
+    status_code: 200
+    timeout: 60
+  register: automatedresponse
+
+- name: Send POST request using uri module to get detailed response
+  ansible.builtin.uri:
+    url: "{{ ai_url }}/v1/chat/completions"
+    method: POST
+    headers:
+      accept: "application/json"
+      Content-Type: "application/json"
+      Authorization: "Bearer {{ api_token }}"
+    body:
+      response_format:
+        type: json_object
+      messages:
+        - 'role': 'system'
+          'content': '{{ prompt }}'
+        - 'role': 'user'
+          'content': '{{ service_log_output }}'
+      max_tokens: "{{ max_tokens | default('500') }}"
+      temperature: 0
+    body_format: json
+    return_content: true
+    status_code: 200
+    timeout: 60
+  register: response
+
+- name: Check if response is JSON and debug output
+  ansible.builtin.debug:
+    msg: "{{ response.json if response.json is defined else response.content }}"
+
+- name: Check if response is JSON and retrieve model name
+  ansible.builtin.debug:
+    msg: "{{ response.json.model | basename if response.json is defined else 'Model not found' }}"
+
+- name: Check if response is JSON and retrieve text
+  ansible.builtin.debug:
+    msg: "{{ response.json.choices[0].message.content if response.json is defined and response.json.choices is defined else 'Text not found' }}"
+
+- name: Set AI Response
+  ansible.builtin.set_fact:
+    ai_response: "{{ response.json.choices[0].message.content | default('No response') }}"
+
+- name: Determine if automation is advised
+  ansible.builtin.debug:
+    msg: "{{ automatedresponse.json.choices[0].message.content | default('No response') }}"
+  when: '"USE_AUTOMATION" in automatedresponse.json.choices[0].message.content'
+
+- name: Block for Automated Response
+  when: '"USE_AUTOMATION" in automatedresponse.json.choices[0].message.content'
+  block:
+    - name: Set fact for service config
+      ansible.builtin.set_fact:
+        service_config: "{{ service_issue }}.conf"
+
+    - name: Pass lightspeed_prompt
+      ansible.builtin.set_stats:
+        data:
+          lightspeed_prompt: "Copy files/{{ service_config }} to {{ service_config }} location and restart {{ service_issue }} service"
+      when: response.json is defined and response.json.choices is defined and service_config in response.json.choices[0].message.content
+
+    - name: Send notification message via Mattermost
+      community.general.mattermost:
+        url: "{{ mattermost_url }}"
+        api_key: "{{ mattermost_api_key }}"
+        attachments:
+          - text: "data model {{ response.json.model | basename if response.json is defined else 'Model not found' }}"
+            color: '#37a3a3'
+            title: Ansible Automated Response
+            fields:
+              - title: Ansible Prompt
+                value: "{{ prompt }} on logs: {{ service_log_output }}"
+                short: true
+              - title: InstructLab AI provided information
+                value: "{{ ai_response.rootCause | default('No response') }}"
+                short: true
+
+    - name: Create an incident in ServiceNow
+      servicenow.itsm.incident:
+        state: new
+        description: A {{ service_issue }} incident has occurred on with AI RCA {{  ai_response.rootCause | default('No response') }}
+        short_description: Automated Response - A {{ service_issue }} incident has been detected on {{ vm_name }}
+        caller: admin
+        urgency: low
+        impact: high
+        other:
+          u_vm_name: "{{ vm_name | default(omit) }}"
+          assignment_group: "{{ ai_response.escalateTo | default(omit) }}"
+          comments: "Remediation Steps: {{ ai_response.remediationSteps | default(omit) }}"
+      register: new_incident
+      delegate_to: localhost
+
+    - name: Display incident number
+      ansible.builtin.debug:
+        var: new_incident.record.number
+
+    - name: Pass incident number
+      ansible.builtin.set_stats:
+        data:
+          ticket_number: "{{ new_incident.record.number }}"
+
+    - name: Pass Incident Link to rest of workflow
+      ansible.builtin.set_stats:
+        data:
+          snow_incident_link: "ServiceNow Incident: {{ lookup('env', 'SN_HOST') }}nav_to.do?uri=incident.do?sysparm_query=number={{ new_incident.record.number }} "
+
+- name: Block for Automated Response
+  when: '"USE_AUTOMATION" not in automatedresponse.json.choices[0].message.content'
+  block:
+
+    - name: Send notification message via Mattermost
+      community.general.mattermost:
+        url: "{{ mattermost_url }}"
+        api_key: "{{ mattermost_api_key }}"
+        attachments:
+          - text: "data model {{ response.json.model | basename if response.json is defined else 'Model not found' }}"
+            color: '#37a3a3'
+            title: Manual Response Required
+            fields:
+              - title: Ansible Prompt
+                value: "{{ prompt }} on logs: {{ service_log_output }}"
+                short: true
+              - title: InstructLab AI provided information
+                value: "{{ ai_response.rootCause | default('No response') }}"
+                short: true
+
+    - name: Create an incident in ServiceNow
+      servicenow.itsm.incident:
+        state: new
+        description: A {{ service_issue }} incident has occurred on with AI RCA {{  ai_response.rootCause | default('No response') }}
+        short_description: Manual intervention - A {{ service_issue }} incident has been detected on {{ vm_name }}
+        caller: admin
+        urgency: high
+        impact: high
+        other:
+          u_vm_name: "{{ vm_name | default(omit) }}"
+          assignment_group: "{{ ai_response.escalateTo | default(omit) }}"
+          comments: "Remediation Steps: {{ ai_response.remediationSteps | default(omit) }}"
+      register: new_incident
+      delegate_to: localhost
+
+    - name: Display incident number
+      ansible.builtin.debug:
+        var: new_incident.record.number
+
+    - name: Fail the Workflow
+      ansible.builtin.fail:
+        msg: "Failing for manual intervention"
