@@ -93,8 +93,11 @@
               - title: Ansible Prompt
                 value: "{{ prompt }} on logs: {{ service_log_output }}"
                 short: true
-              - title: InstructLab AI provided information
+              - title: InstructLab AI Root Cause
                 value: "{{ ai_response.rootCause | default('No response') }}"
+                short: true
+              - title: Remediation Steps
+                value: "{{ ai_response.remediationSteps | default('No Steps') }}"
                 short: true
 
     - name: Create an incident in ServiceNow
@@ -142,8 +145,11 @@
               - title: Ansible Prompt
                 value: "{{ prompt }} on logs: {{ service_log_output }}"
                 short: true
-              - title: InstructLab AI provided information
+              - title: InstructLab AI Root Cause
                 value: "{{ ai_response.rootCause | default('No response') }}"
+                short: true
+              - title: Remediation Steps
+                value: "{{ ai_response.remediationSteps | default('No Steps') }}"
                 short: true
 
     - name: Create an incident in ServiceNow
