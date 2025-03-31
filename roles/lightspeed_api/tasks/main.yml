@@ -17,15 +17,7 @@
 
 - name: Set fact for Ansible Lightspeed generated playbook
   ansible.builtin.set_fact:
-    lightspeed_playbook: "{{ response.json.playbook | from_yaml }}"
-
-- name: Display Ansible Playbook in JSON
-  ansible.builtin.debug:
-    msg: "{{ lightspeed_playbook }}"
-
-- name: Display Ansible Playbook in YAML
-  ansible.builtin.debug:
-    msg: "{{ lightspeed_playbook | to_nice_yaml(sort_keys=False) }}"
+    lightspeed_playbook: "{{ response.json.playbook }}"
 
 - name: Sync with Gitrepo
   ansible.builtin.git:
@@ -39,7 +31,7 @@
 
 - name: Save formatted YAML response to file
   ansible.builtin.copy:
-    content: "{{ lightspeed_playbook | to_nice_yaml(sort_keys=False) }}"
+    content: "{{ lightspeed_playbook }}"
     dest: "/tmp/home/ai/lightspeed-response.yml"
     mode: '0644'
 
