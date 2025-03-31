@@ -1,7 +1,7 @@
 ---
 - name: Send request to AI API
   ansible.builtin.uri:
-    url: "https://c.ai.ansible.redhat.com/api/v0/ai/generations/"
+    url: "https://c.ai.ansible.redhat.com/api/v1/ai/generations/playbook/"
     method: POST
     headers:
       Content-Type: "application/json"
