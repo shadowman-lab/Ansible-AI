@@ -57,7 +57,7 @@
     attachments:
       - text: "data model {{ response.json.model | basename if response.json is defined else 'Model not found' }}"
         color: '#37a3a3'
-        title: Manual Response Required
+        title: AI Analysis Performed
         fields:
           - title: Ansible Prompt
             value: "{{ prompt }} on logs: {{ service_log_output }}"
