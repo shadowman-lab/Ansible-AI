@@ -6,7 +6,7 @@
       ansible.builtin.replace:
         path: /etc/httpd/conf/httpd.conf
         regexp: ^InvalidDirectiveHere
-        replace: ValidDirective
+        state: absent
     - name: restart apache
       ansible.builtin.service:
         name: httpd
