@@ -1,16 +1,12 @@
 ---
-- name: Play to demonstrate task delegation
+- name: copy httpd.conf file
   hosts: datadog.shadowman.dev
   tasks:
-    - name: Check Apache configuration for errors
-      ansible.builtin.command: apachectl -t
-      become: true
-      delegate_to: "{{ item }}"
-      loop: "{{ inventory_hostname |flatten(levels=1) }}"
-    - name: Restart Apache
+    - name: copy httpd.conf
+      ansible.builtin.copy:
+        src: files/httpd.conf
+        dest: /etc/httpd/conf/httpd.conf
+    - name: restart httpd
       ansible.builtin.service:
-        name: apache2
+        name: httpd
         state: restarted
-      become: true
-      delegate_to: "{{ item }}"
-      loop: "{{ inventory_hostname |flatten(levels=1) }}"
