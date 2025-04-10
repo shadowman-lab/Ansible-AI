@@ -14,8 +14,8 @@
   ansible.builtin.debug:
     msg: "{{ service_status.status.ActiveState if service_status.status.ActiveState is defined else 'ActiveState not found' }}"
 
-- name: Retrieve last 20 lines of service logs
-  ansible.builtin.command: journalctl -u {{ service_issue }}.service -n 20
+- name: Retrieve last 4 lines of service logs
+  ansible.builtin.command: journalctl -u {{ service_issue }}.service -n 4
   register: service_logs
   ignore_errors: true
   when: service_status.changed
