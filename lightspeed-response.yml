@@ -1,13 +1,13 @@
 ---
-- name: correct invalid directive
-  hosts: datadog.shadowman.dev
+- name: correct an invalid apache directive
+  hosts: datadog
   tasks:
-    - name: correct invalid directive
+    - name: correct an invalid apache directive
       ansible.builtin.replace:
         path: /etc/httpd/conf/httpd.conf
-        regexp: InvalidDirectiveHere
+        regexp: ^InvalidDirectiveHere
         replace: ValidDirective
-    - name: restart service httpd
+    - name: restart apache
       ansible.builtin.service:
         name: httpd
         state: restarted
