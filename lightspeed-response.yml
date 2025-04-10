@@ -1,13 +1,12 @@
 ---
-- name: correct an invalid apache directive
+- name: copy httpd.conf file
   hosts: datadog.shadowman.dev
   tasks:
-    - name: correct an invalid apache directive
-      ansible.builtin.replace:
-        path: /etc/httpd/conf/httpd.conf
-        regexp: ^InvalidDirectiveHere
-        state: absent
-    - name: restart apache
+    - name: copy httpd.conf
+      ansible.builtin.copy:
+        src: files/httpd.conf
+        dest: /etc/httpd/conf/httpd.conf
+    - name: restart httpd
       ansible.builtin.service:
         name: httpd
         state: restarted
