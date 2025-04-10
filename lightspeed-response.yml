@@ -1,6 +1,6 @@
 ---
 - name: correct an invalid apache directive
-  hosts: datadog
+  hosts: datadog.shadowman.dev
   tasks:
     - name: correct an invalid apache directive
       ansible.builtin.replace:
