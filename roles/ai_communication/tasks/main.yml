@@ -35,7 +35,7 @@
     body:
       prompt: "{{ gpt_prompt }}"
       model: granite-3-8b-instruct
-      max_tokens: 500
+      max_tokens: "{{ max_tokens | default('500') }}"
       temperature: "{{ input_temperature | default(0.5) }}"
       top_p: "{{ input_top_p | default(1) }}"
       n: "{{ input_n | default(1) }}"
@@ -61,16 +61,19 @@
   ansible.builtin.set_fact:
     ai_response: "{{ response.json.choices[0].message.content | default('No response') }}"
 
-# - name: Set fact for service config
-#   ansible.builtin.set_fact:
-#     service_config: "{{ service_issue }}.conf"
+- name: Set fact for service config
+  ansible.builtin.set_fact:
+    service_config: "{{ service_issue }}.conf"
 
 - name: Pass lightspeed_prompt
   ansible.builtin.set_stats:
     data:
-      lightspeed_prompt: "{{ lightspeedresponse.json.choices[0].text }}"
-  #     lightspeed_prompt: "Copy files/{{ service_config }} to {{ service_config }} location and restart {{ service_issue }} service"
-  # when: response.json is defined and response.json.choices is defined and service_config in response.json.choices[0].message.content
+      lightspeed_prompt: "Copy files/{{ service_config }} to {{ service_config }} location and restart {{ service_issue }} service"
+  when: response.json is defined and response.json.choices is defined and service_config in response.json.choices[0].message.content
+
+- name: Debug lightspeedresponse
+  ansible.builtin.debug:
+    msg: "{{ gpt_response.json.choices[0].text }}"
 
 - name: Send notification message via Mattermost
   community.general.mattermost:
