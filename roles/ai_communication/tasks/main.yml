@@ -73,7 +73,7 @@
 
 - name: Debug lightspeedresponse
   ansible.builtin.debug:
-    msg: "{{ gpt_response.json.choices[0].text }}"
+    msg: "{{ lightspeedresponse.json.choices[0].text }}"
 
 - name: Send notification message via Mattermost
   community.general.mattermost:
