@@ -27,7 +27,7 @@
 
 - name: Escape newlines in systemd logs
   ansible.builtin.set_fact:
-    systemd_log_output_escaped: "{{ systemd_log_output | regex_replace('(\r?\n)', '\\\\n') }}"
+    systemd_log_output_escaped: "{{ service_log_output | regex_replace('(\r?\n)', '\\\\n') }}"
   when: service_status.changed
 
 - name: Display service logs
