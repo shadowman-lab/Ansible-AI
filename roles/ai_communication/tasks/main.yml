@@ -1,5 +1,5 @@
 ---
-- name: Send POST request using uri module to get detailed response
+- name: Send POST request using uri module to get RCA response
   ansible.builtin.uri:
     url: "{{ ai_url }}/v1/chat/completions"
     method: POST
@@ -23,6 +23,27 @@
     status_code: 200
     timeout: 60
   register: response
+
+- name: Send POST request using uri module to get lightspeed simple response
+  ansible.builtin.uri:
+    url: "{{ ai_url }}/v1/completions"
+    method: POST
+    headers:
+      accept: "application/json"
+      Content-Type: "application/json"
+      Authorization: "Bearer {{ api_token }}"
+    body:
+      prompt: "{{ gpt_prompt }}"
+      model: granite-3-8b-instruct
+      max_tokens: "{{ max_tokens | default('500') }}"
+      temperature: "{{ input_temperature | default(0.5) }}"
+      top_p: "{{ input_top_p | default(1) }}"
+      n: "{{ input_n | default(1) }}"
+    body_format: json
+    return_content: true
+    status_code: 200
+    timeout: 120
+  register: lightspeedresponse
 
 - name: Check if response is JSON and debug output
   ansible.builtin.debug:
@@ -49,6 +70,10 @@
     data:
       lightspeed_prompt: "Copy files/{{ service_config }} to {{ service_config }} location and restart {{ service_issue }} service"
   when: response.json is defined and response.json.choices is defined and service_config in response.json.choices[0].message.content
+
+- name: Debug lightspeedresponse
+  ansible.builtin.debug:
+    msg: "{{ lightspeedresponse.json.choices[0].text }}"
 
 - name: Send notification message via Mattermost
   community.general.mattermost:

@@ -14,8 +14,8 @@
   ansible.builtin.debug:
     msg: "{{ service_status.status.ActiveState if service_status.status.ActiveState is defined else 'ActiveState not found' }}"
 
-- name: Retrieve last 20 lines of service logs
-  ansible.builtin.command: journalctl -u {{ service_issue }}.service -n 20
+- name: Retrieve last 4 lines of service logs
+  ansible.builtin.command: journalctl -u {{ service_issue }}.service -n 4
   register: service_logs
   ignore_errors: true
   when: service_status.changed
@@ -23,6 +23,11 @@
 - name: Store service logs as a variable
   ansible.builtin.set_fact:
     service_log_output: "{{ service_logs.stdout }}"
+  when: service_status.changed
+
+- name: Escape newlines in systemd logs
+  ansible.builtin.set_fact:
+    systemd_log_output_escaped: "{{ systemd_log_output | regex_replace('(\r?\n)', '\\\\n') }}"
   when: service_status.changed
 
 - name: Display service logs
@@ -33,7 +38,10 @@
 - name: Set stats for next controller job
   ansible.builtin.set_stats:
     data:
-      gpt_prompt: "\n\n### Instructions:\nI would like a summary of the root cause of an issue on our RHEL Linux server with the {{ service_issue }} service. Here are recent error logs: {{ service_log_output }} \n\n### Response:\n"
+      gpt_prompt: >-
+        \n### Instructions:\nA system service is failing on {{ vm_name }}. Below are the logs. Provide a single, concise fix instruction (1-2 lines), add restart of service.\n
+        \n### Logs:\n{{ systemd_log_output_escaped }}\n
+        \n### Fix:\n
       service_log_output: "\"{{ service_logs.stdout }}\""
       max_tokens: 2000
   when: service_status.changed
