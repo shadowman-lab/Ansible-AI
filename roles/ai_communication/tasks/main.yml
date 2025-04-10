@@ -26,15 +26,15 @@
 
 - name: Send POST request using uri module to get lightspeed simple response
   ansible.builtin.uri:
-    url: "{{ ai_url }}/v1/completions"
+    url: "{{ ai_url_second }}/v1/completions"
     method: POST
     headers:
       accept: "application/json"
       Content-Type: "application/json"
-      Authorization: "Bearer {{ api_token }}"
+      Authorization: "Bearer {{ api_token_second }}"
     body:
       prompt: "{{ gpt_prompt }}"
-      model: granite-3-8b-instruct
+      model: granite-8b-lab-v1
       max_tokens: "{{ max_tokens | default('500') }}"
       temperature: "{{ input_temperature | default(0.5) }}"
       top_p: "{{ input_top_p | default(1) }}"
