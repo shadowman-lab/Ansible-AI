@@ -14,7 +14,7 @@
         output with no introduction, no explaintation, only code
         DONT MAKE ANY MISTAKES, check if you did any
         only return ansible code in yaml, without, the yaml code snippet and nothing else.
-        no DOCUMENATION IN THE OUTPUT on host datadog.shadowman.dev: {{ ai_response.remediationSteps | join(",") }}'
+        no DOCUMENATION IN THE OUTPUT on host datadog.shadowman.dev: {{ lightspeed_prompt }} on host {{ vm_name }}'
       max_tokens: "{{ max_tokens | default('500') }}"
     body_format: json
     return_content: true
