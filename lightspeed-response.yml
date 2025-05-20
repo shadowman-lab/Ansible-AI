@@ -1,40 +1,32 @@
 
 
-- hosts: datadog.shadowman.dev
+- name: Validate Httpd Configuration
+  hosts: datadog.shadowman.dev
   become: yes
+  become_method: sudo
   tasks:
-    - name: Review httpd.conf file
-      command: cat /etc/httpd/conf/httpd.conf
-      register: httpd_conf_output
-
-    - name: Identify invalid directive
-      set_fact:
-        syntax_error_line: "{{ httpd_conf_output.stdout_lines |
-            select('search', '"invaliddirective"'|default('')) | first }}"
-
-    - name: Correct the directive
-      lineinfile:
+    - name: Check for invalid directive
+      ansible.builtin.blockinfile:
         path: /etc/httpd/conf/httpd.conf
-        line: "InvalidDirective"
-        create: yes
+        create: false
+        block: |
+          FindResult = 'InvalidDirectiveHere'
         state: present
 
-    - name: Test httpd.conf for syntax errors
-      command: httpd -t
-      register: httpd_syntax_check
-      failed_when: httpd_syntax_check.stdout_lines[0] != "Syntax OK"
+    - name: Correct or remove invalid directive
+      ansible.builtin.lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: 'InvalidDirectiveHere'
+        backup: yes
+        state: absent
 
-    - name: Restart Apache HTTP Server
-      command: systemctl restart httpd
-      when: httpd_syntax_check.stdout_lines[0] != "Syntax OK"
-
-    - name: Monitor system logs
-      lineinfile:
-        path: /var/log/httpd/error_log
-        line: "^.*Error.*$"
+    - name: Include required module
+      ansible.builtin.lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        line: 'LoadModule invalid_module_name.so'
         state: present
-      register: log_changes
 
-    - name: Display system logs
-      command: cat /var/log/httpd/error_log
-      when: log_changes.changed
+    - name: Restart Apache
+      ansible.builtin.systemd:
+        name: httpd
+        state: restarted
