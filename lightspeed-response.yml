@@ -1,12 +1,28 @@
----
-- name: copy httpd.conf file
-  hosts: datadog.shadowman.dev
+:
+- hosts: datadog.shadowman.dev
   tasks:
-    - name: copy httpd.conf
+    - name: Copy file
       ansible.builtin.copy:
         src: files/httpd.conf
-        dest: /etc/httpd/conf/httpd.conf
-    - name: restart httpd
+        dest: /usr/local/apache2/conf/httpd.conf
+    - name: Restart httpd
       ansible.builtin.service:
         name: httpd
         state: restarted
+      notify:
+        - restart Apache
+...
+
+- hosts: datadog.shadowman.dev
+  tasks:
+    - name: Copy file
+      ansible.builtin.copy:
+        src: files/httpd.conf
+        dest: /usr/local/apache2/conf/httpd.conf
+
+    - name: Restart httpd
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
+      notify:
+        - restart Apache
