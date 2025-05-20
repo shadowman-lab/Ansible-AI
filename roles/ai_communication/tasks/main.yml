@@ -48,6 +48,7 @@
   ansible.builtin.set_stats:
     data:
       lightspeed_prompt: "Copy files/{{ service_config }} to {{ service_config }} location and restart {{ service_issue }} service"
+      ai_response: "{{ ai_response }}"
   when: response.json is defined and response.json.choices is defined and service_config in response.json.choices[0].message.content
 
 - name: Send notification message via Mattermost
