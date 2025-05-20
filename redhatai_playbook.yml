@@ -1,0 +1,7 @@
+---
+- name: Create Playbook with Red Hat AI
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - rhai_playbook
