@@ -1,38 +1,28 @@
- Ensure the Apache HTTP Server starts up without any problems.,If no errors are found, send an email with the server's hostname and the message "The Apache HTTP Server has been successfully configured." to the administrator, using 'mail -s "Alert: Apache HTTP Server Status" administrator@shadowman.dev'.
+
 
 - hosts: datadog.shadowman.dev
-  become: yes
+  vars:
+    invalid_directive: "FOO"
   tasks:
-    - name: Review the httpd.conf file
-      ansible.builtin.slurp:
-        src: /etc/httpd/conf/httpd.conf
-      register: httpd_content
+  - name: Review and correct the httpd.conf file
+    ansible.builtin.lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      line: '{{ invalid_directive }}'
+      state: replaced
+      backup: yes
 
-    - name: Identify the invalid directive on line 35
-      ansible.builtin.set_fact:
-        invalid_directive: "{{ (httpd_content.content | from_lines) | line(35) }}"
+  - name: Check for syntax errors
+    ansible.builtin.command:
+      cmd: "httpd -t"
+    register: httpd_check
 
-    - name: Correct the spelling or ensure the directive is properly included
-      ansible.builtin.lineinfile:
-        path: /etc/httpd/conf/httpd.conf
-        line: "{{ invalid_directive | default('Error line 35 not found') }}"
-        create: yes
-        state: present
+  - name: Restart Apache HTTP Server
+    ansible.builtin.systemd:
+      name: httpd
+      state: restarted
+      enabled: yes
 
-    - name: Test the httpd.conf file for syntax errors
-      ansible.builtin.shell: httpd -t
-
-    - name: Restart the Apache HTTP Server
-      ansible.builtin.systemd:
-        name: httpd
-        state: restarted
-
-    - name: Monitor the system logs for any further errors or issues
-      ansible.builtin.shell: tail -f /var/log/httpd/error_log
-
-    - name: Send an email if no errors are found
-      ansible.builtin.shell: |
-        if [ "$(tail -1 /var/log/httpd/error_log | cut -d ' ' -f 1 | basename -s '.log')" = 'solara' ]; then
-          echo "Subject: Alert: Apache HTTP Server Status" | mail -s "Alert: Apache HTTP Server Status" administrator@shadowman.dev
-          echo "The Apache HTTP Server has been successfully configured on $(hostname)" | mail -s "Alert: Apache HTTP Server Status" administrator@shadowman.dev -a /var/log/httpd/error_log
-        fi
+  - name: Monitor system logs
+    ansible.builtin.debug:
+      var: httpd_check.stdout_lines
+...
