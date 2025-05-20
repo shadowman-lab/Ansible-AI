@@ -1,32 +1,12 @@
-
-
-- name: Validate Httpd Configuration
+---
+- name: copy httpd.conf file
   hosts: datadog.shadowman.dev
-  become: yes
-  become_method: sudo
   tasks:
-    - name: Check for invalid directive
-      ansible.builtin.blockinfile:
-        path: /etc/httpd/conf/httpd.conf
-        create: false
-        block: |
-          FindResult = 'InvalidDirectiveHere'
-        state: present
-
-    - name: Correct or remove invalid directive
-      ansible.builtin.lineinfile:
-        path: /etc/httpd/conf/httpd.conf
-        regexp: 'InvalidDirectiveHere'
-        backup: yes
-        state: absent
-
-    - name: Include required module
-      ansible.builtin.lineinfile:
-        path: /etc/httpd/conf/httpd.conf
-        line: 'LoadModule invalid_module_name.so'
-        state: present
-
-    - name: Restart Apache
-      ansible.builtin.systemd:
+    - name: copy httpd.conf
+      ansible.builtin.copy:
+        src: files/httpd.conf
+        dest: /etc/httpd/conf/httpd.conf
+    - name: restart httpd
+      ansible.builtin.service:
         name: httpd
         state: restarted
