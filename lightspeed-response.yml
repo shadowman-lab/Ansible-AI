@@ -1,42 +1,40 @@
 
 
-- name: Check and correct httpd.conf
-  hosts: datadog.shadowman.dev
-  vars:
-    httpd_conf_path: /etc/httpd/conf/httpd.conf
+- hosts: datadog.shadowman.dev
+  become: yes
   tasks:
-    - name: Review httpd.conf file and identify the invalid directive on line 35
-      ansible.builtin.shell: 'grep ^ #line 35 {{ httpd_conf_path }}'
-      register: httpd_config_error
+    - name: Review httpd.conf file
+      command: cat /etc/httpd/conf/httpd.conf
+      register: httpd_conf_output
 
-    - name: Correct the spelling or ensure the directive is properly included
-      ansible.builtin.lineinfile:
-        path: "{{ httpd_conf_path }}"
-        line: "# directive corrected"
-        insertbefore: "^# line 35"
-      when: httpd_config_error.stdout_lines | length > 0
+    - name: Identify invalid directive
+      set_fact:
+        syntax_error_line: "{{ httpd_conf_output.stdout_lines |
+            select('search', '"invaliddirective"'|default('')) | first }}"
 
-    - name: Test httpd.conf file for syntax errors
-      ansible.builtin.shell: "httpd -t"
+    - name: Correct the directive
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        line: "InvalidDirective"
+        create: yes
+        state: present
+
+    - name: Test httpd.conf for syntax errors
+      command: httpd -t
       register: httpd_syntax_check
-      changed_when: "'Syntax' in httpd_syntax_check.stdout"
+      failed_when: httpd_syntax_check.stdout_lines[0] != "Syntax OK"
 
     - name: Restart Apache HTTP Server
-      ansible.builtin.systemd:
-        name: httpd
-        state: restarted
-      when: httpd_syntax_check.rc == 0
+      command: systemctl restart httpd
+      when: httpd_syntax_check.stdout_lines[0] != "Syntax OK"
 
-- name: Monitor system logs for any further errors or issues
-  hosts: datadog.shadowman.dev
-  vars:
-    journalctl_filters:
-      - module: kernel
-      - module: cron
-    journalctl_options: "--since '1 hour ago'"
-  tasks:
+    - name: Monitor system logs
+      lineinfile:
+        path: /var/log/httpd/error_log
+        line: "^.*Error.*$"
+        state: present
+      register: log_changes
+
     - name: Display system logs
-      ansible.builtin.shell: "journalctl {{ journalctl_filters | join(' ') }} {{ journalctl_options }}"
-      register: system_logs
-      failed_when: system_logs.stdout_lines | length > 0
-
+      command: cat /var/log/httpd/error_log
+      when: log_changes.changed
