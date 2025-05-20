@@ -9,12 +9,12 @@
       Content-Type: "application/json"
       Authorization: "Bearer {{ api_token }}"
     body:
-      prompt: 'You are a technical expert specializing in Ansible and your job  is to carefully follow the given instructions to generate the required playbook
+      prompt: 'You are a technical expert specializing in Ansible and RHEL and your job  is to carefully follow the given instructions to generate the required playbook
         * make sure to apply those restriction and follow them directly and dont skip any of them:
         output with no introduction, no explaintation, only code
         DONT MAKE ANY MISTAKES, check if you did any
         only return ansible code in yaml, without, the yaml code snippet and nothing else.
-        no DOCUMENATION IN THE OUTPUT on host datadog.shadowman.dev: {{ lightspeed_prompt }} on host {{ vm_name }}'
+        no DOCUMENATION IN THE OUTPUT: {{ lightspeed_prompt }} on host {{ vm_name }}'
       max_tokens: "{{ max_tokens | default('500') }}"
     body_format: json
     return_content: true
