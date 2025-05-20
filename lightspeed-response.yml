@@ -1,12 +1,38 @@
----
-- name: copy httpd.conf file
-  hosts: datadog.shadowman.dev
+ Ensure the Apache HTTP Server starts up without any problems.,If no errors are found, send an email with the server's hostname and the message "The Apache HTTP Server has been successfully configured." to the administrator, using 'mail -s "Alert: Apache HTTP Server Status" administrator@shadowman.dev'.
+
+- hosts: datadog.shadowman.dev
+  become: yes
   tasks:
-    - name: copy httpd.conf
-      ansible.builtin.copy:
-        src: files/httpd.conf
-        dest: /etc/httpd/conf/httpd.conf
-    - name: restart httpd
-      ansible.builtin.service:
+    - name: Review the httpd.conf file
+      ansible.builtin.slurp:
+        src: /etc/httpd/conf/httpd.conf
+      register: httpd_content
+
+    - name: Identify the invalid directive on line 35
+      ansible.builtin.set_fact:
+        invalid_directive: "{{ (httpd_content.content | from_lines) | line(35) }}"
+
+    - name: Correct the spelling or ensure the directive is properly included
+      ansible.builtin.lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        line: "{{ invalid_directive | default('Error line 35 not found') }}"
+        create: yes
+        state: present
+
+    - name: Test the httpd.conf file for syntax errors
+      ansible.builtin.shell: httpd -t
+
+    - name: Restart the Apache HTTP Server
+      ansible.builtin.systemd:
         name: httpd
         state: restarted
+
+    - name: Monitor the system logs for any further errors or issues
+      ansible.builtin.shell: tail -f /var/log/httpd/error_log
+
+    - name: Send an email if no errors are found
+      ansible.builtin.shell: |
+        if [ "$(tail -1 /var/log/httpd/error_log | cut -d ' ' -f 1 | basename -s '.log')" = 'solara' ]; then
+          echo "Subject: Alert: Apache HTTP Server Status" | mail -s "Alert: Apache HTTP Server Status" administrator@shadowman.dev
+          echo "The Apache HTTP Server has been successfully configured on $(hostname)" | mail -s "Alert: Apache HTTP Server Status" administrator@shadowman.dev -a /var/log/httpd/error_log
+        fi
