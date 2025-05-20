@@ -1,41 +1,42 @@
 
 
-- name: Review and correct httpd.conf file on datadog.shadowman.dev
+- name: Check and correct httpd.conf
   hosts: datadog.shadowman.dev
-  become: yes
+  vars:
+    httpd_conf_path: /etc/httpd/conf/httpd.conf
   tasks:
-    - name: Review httpd.conf file
-      ansible.builtin.slurp:
-        src: /etc/httpd/conf/httpd.conf
-      register: httpd_conf_content
+    - name: Review httpd.conf file and identify the invalid directive on line 35
+      ansible.builtin.shell: 'grep ^ #line 35 {{ httpd_conf_path }}'
+      register: httpd_config_error
 
-    - name: Identify invalid directive on line 35
-      ansible.builtin.set_fact:
-        invalid_directive: "{{ (httpd_conf_content.content | string) | position('\\n', 34) }}"
-      when: invalid_directive is defined
-
-    - name: Correct spelling or ensure directive is properly included in the server configuration
+    - name: Correct the spelling or ensure the directive is properly included
       ansible.builtin.lineinfile:
-        path: /etc/httpd/conf/httpd.conf
-        line: "{{ invalid_directive }}"
-        state: present
-        create: yes
-        backup: yes
-      when: invalid_directive
+        path: "{{ httpd_conf_path }}"
+        line: "# directive corrected"
+        insertbefore: "^# line 35"
+      when: httpd_config_error.stdout_lines | length > 0
 
     - name: Test httpd.conf file for syntax errors
-      ansible.builtin.command: httpd -t
-      register: httpd_test_result
-      changed_when: httpd_test_result.stdout.find('Syntax OK') == -1
+      ansible.builtin.shell: "httpd -t"
+      register: httpd_syntax_check
+      changed_when: "'Syntax' in httpd_syntax_check.stdout"
 
-    - name: Restart the Apache HTTP Server
-      ansible.builtin.service:
+    - name: Restart Apache HTTP Server
+      ansible.builtin.systemd:
         name: httpd
         state: restarted
-      when: httpd_test_result.stdout.find('Syntax OK') == -1
+      when: httpd_syntax_check.rc == 0
 
-    - name: Monitor system logs for errors
-      ansible.builtin.command: tail -n 10 /var/log/httpd/error.log
-      register: error_log_output
-      when: httpd_test_result.stdout.find('Syntax OK') == -1
-...
+- name: Monitor system logs for any further errors or issues
+  hosts: datadog.shadowman.dev
+  vars:
+    journalctl_filters:
+      - module: kernel
+      - module: cron
+    journalctl_options: "--since '1 hour ago'"
+  tasks:
+    - name: Display system logs
+      ansible.builtin.shell: "journalctl {{ journalctl_filters | join(' ') }} {{ journalctl_options }}"
+      register: system_logs
+      failed_when: system_logs.stdout_lines | length > 0
+
