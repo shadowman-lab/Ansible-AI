@@ -1,47 +1,41 @@
 
 
-- name: Check and verify httpd.conf file
+- name: Review and correct httpd.conf file on datadog.shadowman.dev
   hosts: datadog.shadowman.dev
   become: yes
   tasks:
-    - name: Check httpd.conf file for invalid directive
+    - name: Review httpd.conf file
       ansible.builtin.slurp:
-        path: /etc/httpd/conf/httpd.conf
-      register: httpd_conf
+        src: /etc/httpd/conf/httpd.conf
+      register: httpd_conf_content
 
-    - name: Filter out directive on line 35
+    - name: Identify invalid directive on line 35
       ansible.builtin.set_fact:
-        invalid_directive: "{{ (httpd_conf.filtered.split('\n')[35]).split(' ')[0] }}"
-
-    - name: Validate invalid directive
-      ansible.builtin.debug:
-        msg: "Invalid directive detected: {{ invalid_directive }}"
+        invalid_directive: "{{ (httpd_conf_content.content | string) | position('\\n', 34) }}"
       when: invalid_directive is defined
 
-    - name: Correct the invalid directive
+    - name: Correct spelling or ensure directive is properly included in the server configuration
       ansible.builtin.lineinfile:
         path: /etc/httpd/conf/httpd.conf
-        line: "{{ item }}"
+        line: "{{ invalid_directive }}"
+        state: present
         create: yes
-      with_items:
-        - "{{ item | replace(invalid_directive, valid_directive) }}"
-      when: invalid_directive is defined
+        backup: yes
+      when: invalid_directive
 
     - name: Test httpd.conf file for syntax errors
       ansible.builtin.command: httpd -t
-      register: httpd_test
+      register: httpd_test_result
+      changed_when: httpd_test_result.stdout.find('Syntax OK') == -1
 
-    - name: Check httpd.conf syntax test result
-      ansible.builtin.debug:
-        msg: "httpd.conf syntax test: {{ httpd_test.stdout }}"
-
-    - name: Restart Apache HTTP Server
+    - name: Restart the Apache HTTP Server
       ansible.builtin.service:
         name: httpd
         state: restarted
-      when: httpd_test.rc == 0
-Replace `valid_directive` with the correct directive that should be used to replace the invalid one.
+      when: httpd_test_result.stdout.find('Syntax OK') == -1
 
-Note: This playbook assumes that the `valid_directive` is known and provided elsewhere in the playbook or environment.
-
-This playbook checks for an invalid directive on line 35 of the `httpd.conf` file, corrects it if found, tests the syntax, and restarts the Apache HTTP Server if the test is successful. It also logs the result of the syntax test for review.
+    - name: Monitor system logs for errors
+      ansible.builtin.command: tail -n 10 /var/log/httpd/error.log
+      register: error_log_output
+      when: httpd_test_result.stdout.find('Syntax OK') == -1
+...
