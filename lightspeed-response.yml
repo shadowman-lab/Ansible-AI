@@ -1,28 +1,47 @@
 
 
-- hosts: datadog.shadowman.dev
-  vars:
-    invalid_directive: "FOO"
+- name: Check and verify httpd.conf file
+  hosts: datadog.shadowman.dev
+  become: yes
   tasks:
-  - name: Review and correct the httpd.conf file
-    ansible.builtin.lineinfile:
-      path: /etc/httpd/conf/httpd.conf
-      line: '{{ invalid_directive }}'
-      state: replaced
-      backup: yes
+    - name: Check httpd.conf file for invalid directive
+      ansible.builtin.slurp:
+        path: /etc/httpd/conf/httpd.conf
+      register: httpd_conf
 
-  - name: Check for syntax errors
-    ansible.builtin.command:
-      cmd: "httpd -t"
-    register: httpd_check
+    - name: Filter out directive on line 35
+      ansible.builtin.set_fact:
+        invalid_directive: "{{ (httpd_conf.filtered.split('\n')[35]).split(' ')[0] }}"
 
-  - name: Restart Apache HTTP Server
-    ansible.builtin.systemd:
-      name: httpd
-      state: restarted
-      enabled: yes
+    - name: Validate invalid directive
+      ansible.builtin.debug:
+        msg: "Invalid directive detected: {{ invalid_directive }}"
+      when: invalid_directive is defined
 
-  - name: Monitor system logs
-    ansible.builtin.debug:
-      var: httpd_check.stdout_lines
-...
+    - name: Correct the invalid directive
+      ansible.builtin.lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        line: "{{ item }}"
+        create: yes
+      with_items:
+        - "{{ item | replace(invalid_directive, valid_directive) }}"
+      when: invalid_directive is defined
+
+    - name: Test httpd.conf file for syntax errors
+      ansible.builtin.command: httpd -t
+      register: httpd_test
+
+    - name: Check httpd.conf syntax test result
+      ansible.builtin.debug:
+        msg: "httpd.conf syntax test: {{ httpd_test.stdout }}"
+
+    - name: Restart Apache HTTP Server
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
+      when: httpd_test.rc == 0
+Replace `valid_directive` with the correct directive that should be used to replace the invalid one.
+
+Note: This playbook assumes that the `valid_directive` is known and provided elsewhere in the playbook or environment.
+
+This playbook checks for an invalid directive on line 35 of the `httpd.conf` file, corrects it if found, tests the syntax, and restarts the Apache HTTP Server if the test is successful. It also logs the result of the syntax test for review.
