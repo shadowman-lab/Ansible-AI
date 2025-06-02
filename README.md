@@ -2,7 +2,7 @@
 
 Ansible AI Response Workflow Example
 
-<img src="ansible_ai_response.png" alt="AAP AI Response Workflow" title="AAP AI Response Workflow" width="500" />
+<img src="ansible_ai_response.png" alt="AAP AI Response Workflow" title="AAP AI Response Workflow" width="1000" />
 
 Playbooks to call:
 Workflow requires Vars:
