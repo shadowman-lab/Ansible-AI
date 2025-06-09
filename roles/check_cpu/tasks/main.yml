@@ -6,9 +6,5 @@
 - name: Set stats for next controller job
   ansible.builtin.set_stats:
     data:
-      gpt_prompt: >-
-        \n### Instructions:\nA high CPU issue is found on {{ vm_name }}. Below are the logs. Provide a single, concise fix instruction (1-2 lines).\n
-        \n### Logs:\n{{ systemd_log_output_escaped }}\n
-        \n### Fix:\n
       service_log_output: "\"{{ cpuusage.stdout }}\""
       max_tokens: 2000
