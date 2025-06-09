@@ -73,7 +73,7 @@
 - name: Create an incident in ServiceNow
   servicenow.itsm.incident:
     state: new
-    description: A {{ service_issue }} incident has occurred on with AI RCA {{  ai_response.rootCause | default('No response') }}
+    description: A {{ service_issue }} incident has occurred on {{ vm_name }} with AI determined RCA {{  ai_response.rootCause | default('No response') }}
     short_description: A {{ service_issue }} incident has been detected on {{ vm_name }}
     caller: admin
     urgency: medium
