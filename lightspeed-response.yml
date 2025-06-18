@@ -1,11 +1,12 @@
 ---
-- name: copy httpd.conf file
+- name: remove line in file
   hosts: datadog.shadowman.dev
   tasks:
-    - name: copy httpd.conf
-      ansible.builtin.copy:
-        src: files/httpd.conf
-        dest: /etc/httpd/conf/httpd.conf
+    - name: remove a line from a file
+      ansible.builtin.lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: InvalidDirectiveHere
+        state: absent
     - name: restart httpd
       ansible.builtin.service:
         name: httpd
