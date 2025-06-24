@@ -1,6 +1,6 @@
 ---
 - name: Get current CPU usage
-  ansible.builtin.command: top -b -n 1
+  ansible.builtin.command: top -b -n 1 -w512
   register: cpuusage
 
 - name: Set stats for next controller job
