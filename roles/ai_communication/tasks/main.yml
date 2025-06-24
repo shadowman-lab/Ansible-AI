@@ -74,7 +74,7 @@
   ansible.builtin.copy:
     content: "{{ service_log_output }}"
     dest: /tmp/logs.txt
-    mode: '0644'
+    mode: '0600'
 
 - name: Create an incident in ServiceNow
   servicenow.itsm.incident:
@@ -90,7 +90,7 @@
       comments: "Remediation Steps: {{ ai_response.remediationSteps | default(omit) }}"
     attachments:
       - path: /tmp/logs.txt
-        name: "{{ vm_name | default(omit) }} logs"
+        name: "{{ service_issue | default(omit) }} logs"
   register: new_incident
   delegate_to: localhost
 
