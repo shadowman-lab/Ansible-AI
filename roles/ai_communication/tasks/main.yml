@@ -15,7 +15,7 @@
           'content': '{{ prompt }}'
         - 'role': 'user'
           'content': '{{ service_log_output }}'
-      model: granite-3-8b-instruct
+      model: "{{ ai_model }}"
       max_tokens: "{{ max_tokens | default('500') }}"
       temperature: 0
     body_format: json
