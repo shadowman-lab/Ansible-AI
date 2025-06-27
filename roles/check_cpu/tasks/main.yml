@@ -1,6 +1,6 @@
 ---
 - name: Get current CPU usage
-  ansible.builtin.shell: 'top -b -n 1 -w512 | head -n 15'
+  ansible.builtin.command: top -b -n 1 -w512
   changed_when: false
   register: cpuusage
 
