@@ -1,7 +1,7 @@
 ---
 - name: Get current CPU usage
   ansible.builtin.shell:
-    cmd: set -o pipefail && top -b -n 1 -w512 | head -n 81
+    cmd: set -o pipefail && top -b -n 1 -w512
     executable: /bin/bash
   changed_when: false
   register: cpuusage
