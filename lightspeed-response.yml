@@ -1,1 +1,12 @@
-blah blah replace me
+---
+- name: copy httpd.conf file
+  hosts: datadog.shadowman.dev
+  tasks:
+    - name: copy httpd.conf
+      ansible.builtin.copy:
+        src: files/httpd.conf
+        dest: /etc/httpd/conf/httpd.conf
+    - name: restart httpd
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
