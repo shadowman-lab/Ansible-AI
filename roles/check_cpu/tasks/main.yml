@@ -1,9 +1,16 @@
 ---
-- name: Get current CPU usage
+- name: Get current CPU usage if Linux
   ansible.builtin.shell:
     cmd: set -o pipefail && top -b -n 1 -w512
     executable: /bin/bash
   changed_when: false
+  when: os is match("rhel.*") or os == "Red Hat BYOL Linux"
+  register: cpuusage
+
+- name: Get current CPU usage if Windows
+  ansible.windows.win_shell: "Get-Process"
+  changed_when: false
+  when: os is match("windows.*") or os is match("2016.*") or os == "Windows"
   register: cpuusage
 
 - name: Set stats for next controller job
