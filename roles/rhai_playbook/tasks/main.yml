@@ -16,6 +16,7 @@
         only return ansible code in yaml, without, the yaml code snippet and nothing else.
         no DOCUMENATION IN THE OUTPUT: {{ lightspeed_prompt }} on host {{ vm_name }}'
       max_tokens: "{{ max_tokens | default('500') }}"
+      model: "{{ ai_model }}"
     body_format: json
     return_content: true
     status_code: 200
