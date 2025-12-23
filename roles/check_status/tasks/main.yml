@@ -1,4 +1,11 @@
 ---
+- name: Use Windows name for web
+  ansible.builtin.set_fact:
+    service_issue: "World Wide Web Publishing Service"
+  when:
+    - os is match("windows.*") or os is match("2016.*") or os == "Windows"
+    - service_issue == "httpd"
+
 - name: Include RHEL tasks
   ansible.builtin.include_tasks: rhel.yml
   when: os is match("rhel.*") or os == "Red Hat BYOL Linux"

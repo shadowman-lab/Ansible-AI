@@ -1,7 +1,7 @@
 ---
 - name: Get info for IIS
   ansible.windows.win_service_info:
-    name: World Wide Web Publishing Service
+    name: "{{ service_issue }}"
   register: service_info
 
 - name: Get ServerManager Logs if not running
