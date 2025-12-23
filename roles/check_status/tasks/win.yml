@@ -1,0 +1,26 @@
+---
+- name: Get info for IIS
+  ansible.windows.win_service_info:
+    name: World Wide Web Publishing Service
+  register: service_info
+
+- name: Get ServerManager Logs if not running
+  ansible.windows.win_shell: Get-WinEvent -LogName "Microsoft-Windows-ServerManager-MultiMachine/Operational" -MaxEvents 50
+  register: service_log_output
+  when: service_info.services[0].state != "started"
+
+- name: Display service logs
+  ansible.builtin.debug:
+    msg: "{{ service_log_output.stdout }}"
+  when: service_info.services[0].state != "started"
+
+- name: Set stats for next controller job
+  ansible.builtin.set_stats:
+    data:
+      gpt_prompt: >-
+        \n### Instructions:\nA system service is failing on {{ vm_name }}. Below are the logs. Provide a single, concise fix instruction (1-2 lines), add restart of service.\n
+        \n### Logs:\n{{ service_log_output.stdout }}\n
+        \n### Fix:\n
+      service_log_output: "\"{{ service_log_output.stdout }}\""
+      max_tokens: 2000
+  when: service_info.services[0].state != "started"
