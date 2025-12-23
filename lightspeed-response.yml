@@ -1,6 +1,6 @@
 ---
 - name: remove line in file
-  hosts: datadog.ad.shadowman.dev
+  hosts: datadog.shadowman.dev
   tasks:
     - name: remove a line from a file
       ansible.builtin.lineinfile:
