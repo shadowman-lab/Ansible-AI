@@ -112,6 +112,7 @@
         impact: high
         other:
           u_vm_name: "{{ vm_name | default(omit) }}"
+          cmdb_ci: "{{ vm_name | default(omit) }}"
           assignment_group: "{{ ai_response.escalateTo | default(omit) }}"
           comments: "Remediation Steps: {{ ai_response.remediationSteps | default(omit) }}"
       register: new_incident
