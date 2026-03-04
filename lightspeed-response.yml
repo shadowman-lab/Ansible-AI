@@ -1,12 +1,7 @@
 ---
-- name: copy httpd.conf file
-  hosts: datadog.shadowman.dev
+- name: Fail
+  hosts: localhost
   tasks:
-    - name: copy httpd.conf
-      ansible.builtin.copy:
-        src: files/httpd.conf
-        dest: /etc/httpd/conf/httpd.conf
-    - name: restart httpd
-      ansible.builtin.service:
-        name: httpd
-        state: restarted
+    - name: Fail
+      ansible.builtin.fail:
+        msg: "Fail"
