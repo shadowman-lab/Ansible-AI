@@ -1,12 +1,12 @@
 ---
-- name: copy httpd.conf file
-  hosts: datadog.shadowman.dev
+- name: Restart httpd service
+  hosts: dynatrace
   tasks:
-    - name: copy httpd.conf
+    - name: Copy httpd.conf file
       ansible.builtin.copy:
         src: files/httpd.conf
         dest: /etc/httpd/conf/httpd.conf
-    - name: restart httpd
+    - name: Restart httpd service
       ansible.builtin.service:
         name: httpd
         state: restarted
