@@ -1,6 +1,6 @@
 ---
 - name: Restart httpd service
-  hosts: dynatrace.shadowman.dev
+  hosts: dynatrace
   tasks:
     - name: Copy httpd.conf file
       ansible.builtin.copy:
