@@ -1,0 +1,7 @@
+---
+- name: Check VM Memory
+  hosts: "{{ vm_name }}"
+  gather_facts: false
+
+  roles:
+    - check_memory

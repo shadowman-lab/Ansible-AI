@@ -19,6 +19,7 @@ ai infrastructure and services.
 | [ai_communication](roles/ai_communication/README.md) | Role for ai communication |
 | [ai_communication_advanced](roles/ai_communication_advanced/README.md) | Role for ai communication advanced |
 | [check_cpu](roles/check_cpu/README.md) | Role for check cpu |
+| [check_memory](roles/check_memory/README.md) | Role for check memory |
 | [check_status](roles/check_status/README.md) | Role for check status |
 | [lightspeed_api](roles/lightspeed_api/README.md) | Role for lightspeed api |
 | [rhai_playbook](roles/rhai_playbook/README.md) | Role for rhai playbook |
@@ -32,6 +33,7 @@ ai infrastructure and services.
 | ai_communication.yml | Playbook for ai communication | localhost |
 | ai_communication_advanced.yml | Playbook for ai communication advanced | localhost |
 | check_cpu.yml | Playbook for check cpu | {{ vm_name }} |
+| check_memory.yml | Playbook for check memory | {{ vm_name }} |
 | check_status.yml | Playbook for check status | {{ vm_name }} |
 | lightspeed-request.yml | Playbook for lightspeed-request | localhost |
 | lightspeed-response.yml | Playbook for lightspeed-response | datadog.shadowman.dev |
