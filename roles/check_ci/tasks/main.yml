@@ -2,6 +2,8 @@
 - name: Get CI information from ServiceNow
   servicenow.itsm.configuration_item_info:
     sys_id: "{{ incident.cmdb_ci }}"
+    sysparm_display_value: true
+    sys_class_name: cmdb_ci_server
   register: cmdb_ci_information
 
 - name: Set stats for next controller job on CI information
