@@ -53,6 +53,7 @@
 
 - name: Update an incident in ServiceNow
   servicenow.itsm.incident:
+    sys_id: "{{ incident.sys_id }}"
     description: AI determined RCA {{  ai_response.rootCause | default('No response') }}
     other:
       assignment_group: "{{ ai_response.escalateTo | default(omit) }}"
