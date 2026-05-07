@@ -14,9 +14,7 @@
         - 'role': 'system'
           'content': '{{ prompt }}'
         - 'role': 'user'
-          'content': '{{ incident }}'
-        - 'role': 'user'
-          'content': '{{ cmdb_ci }}'
+          'content': 'Incident: {{ incident }}. CI Information: {{ cmdb_ci }}'
       model: "{{ ai_model }}"
       max_tokens: "{{ max_tokens | default('500') }}"
       temperature: 0
