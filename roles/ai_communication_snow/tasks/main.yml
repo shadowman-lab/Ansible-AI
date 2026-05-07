@@ -1,0 +1,69 @@
+---
+- name: Send POST request using uri module to get AI response
+  ansible.builtin.uri:
+    url: "{{ ai_url }}/v1/chat/completions"
+    method: POST
+    headers:
+      accept: "application/json"
+      Content-Type: "application/json"
+      Authorization: "Bearer {{ api_token }}"
+    body:
+      response_format:
+        type: json_object
+      messages:
+        - 'role': 'system'
+          'content': '{{ prompt }}'
+        - 'role': 'user'
+          'content': '{{ service_log_output }}'
+      model: "{{ ai_model }}"
+      max_tokens: "{{ max_tokens | default('500') }}"
+      temperature: 0
+    body_format: json
+    return_content: true
+    status_code: 200
+    timeout: 60
+  register: response
+
+- name: Check if response is JSON and retrieve text
+  ansible.builtin.debug:
+    msg: "{{ response.json.choices[0].message.content if response.json is defined and response.json.choices is defined else 'Text not found' }}"
+
+- name: Set AI Response
+  ansible.builtin.set_fact:
+    ai_response: "{{ response.json.choices[0].message.content | default('No response') }}"
+
+- name: Send notification message via Mattermost
+  community.general.mattermost:
+    url: "{{ mattermost_url }}"
+    api_key: "{{ mattermost_api_key }}"
+    attachments:
+      - text: "data model {{ response.json.model | basename if response.json is defined else 'Model not found' }}"
+        color: '#37a3a3'
+        title: AI Analysis Performed
+        fields:
+          - title: AI Escalation Recommendation
+            value: "{{ ai_response.escalateTo | default('No response') }}"
+            short: true
+          - title: AI Root Cause
+            value: "{{ ai_response.rootCause | default('No response') }}"
+            short: true
+          - title: Remediation Steps
+            value: "{{ ai_response.remediationSteps | default('No Steps') }}"
+            short: true
+
+- name: Update an incident in ServiceNow
+  servicenow.itsm.incident:
+    description: AI determined RCA {{  ai_response.rootCause | default('No response') }}
+    other:
+      assignment_group: "{{ ai_response.escalateTo | default(omit) }}"
+      comments: "Remediation Steps: {{ ai_response.remediationSteps | default(omit) }}"
+
+- name: Pass incident number
+  ansible.builtin.set_stats:
+    data:
+      ticket_number: "{{ incident.number }}"
+
+- name: Pass Incident Link to rest of workflow
+  ansible.builtin.set_stats:
+    data:
+      snow_incident_link: "ServiceNow Incident: {{ lookup('env', 'SN_HOST') }}nav_to.do?uri=incident.do?sysparm_query=number={{ incident.number }} "

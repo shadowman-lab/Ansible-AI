@@ -1,0 +1,10 @@
+---
+- name: Get CI information from ServiceNow
+  servicenow.itsm.configuration_item_info:
+    sys_id: "{{ incident.cmdb_ci }}"
+  register: cmdb_ci_information
+
+- name: Set stats for next controller job on CI information
+  ansible.builtin.set_stats:
+    data:
+      cmdb_ci: "{{ cmdb_ci_information.records[0] }}"

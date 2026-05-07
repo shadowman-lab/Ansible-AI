@@ -1,0 +1,7 @@
+---
+- name: Check CI
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - check_ci
