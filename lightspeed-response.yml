@@ -1,7 +1,8 @@
 ---
-- name: Fail
-  hosts: localhost
+- name: copy httpd.conf
+  hosts: datadog.shadowman.dev
   tasks:
-    - name: Fail
-      ansible.builtin.fail:
-        msg: "Fail"
+    - name: copy httpd.conf
+      ansible.builtin.copy:
+        src: files/httpd.conf
+        dest: /etc/httpd/conf/httpd.conf
