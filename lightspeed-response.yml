@@ -2,7 +2,7 @@
 - name: copy httpd.conf file
   hosts: datadog.shadowman.dev
   tasks:
-    - name: copy httpd.conf file
+    - name: copy httpd.conf to /etc/httpd/conf/httpd.conf
       ansible.builtin.copy:
         src: files/httpd.conf
         dest: /etc/httpd/conf/httpd.conf
