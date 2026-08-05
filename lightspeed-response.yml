@@ -1,5 +1,5 @@
 ---
-- name: copy httpd.conf and restart httpd
+- name: copy httpd.conf
   hosts: datadog.shadowman.dev
   tasks:
     - name: copy apache configuration file
@@ -9,4 +9,4 @@
     - name: restart httpd
       ansible.builtin.service:
         name: httpd
-        state: restarted
+        state: reloaded
