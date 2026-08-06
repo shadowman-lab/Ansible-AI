@@ -1,11 +1,12 @@
-- name: learning to register
+---
+- name: copy httpd.conf file
   hosts: datadog.shadowman.dev
   tasks:
-    - name: copy file
+    - name: copy httpd.conf to /etc/httpd/conf/httpd.conf
       ansible.builtin.copy:
         src: files/httpd.conf
         dest: /etc/httpd/conf/httpd.conf
-    - name: restart httpd
+    - name: restart httpd service
       ansible.builtin.service:
         name: httpd
-        state:Restart
+        state: restarted
