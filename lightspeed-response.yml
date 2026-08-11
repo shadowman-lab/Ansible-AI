@@ -1,5 +1,5 @@
 ---
-- name: copy httpd.conf and restart httpd
+- name: copy httpd.conf file
   hosts: datadog.shadowman.dev
   tasks:
     - name: copy httpd.conf
