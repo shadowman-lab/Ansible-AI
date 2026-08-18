@@ -1,0 +1,10 @@
+---
+argument_specs:
+  main:
+    short_description: Send logs to an AI model for root cause analysis
+    options:
+      api_token:
+        type: str
+        required: true
+        no_log: true
+        description: API token used to authenticate with the AI service
