@@ -1,12 +1,12 @@
 ---
-- name: copy httpd.conf file
+- name: This is a play within a playbook
   hosts: datadog.shadowman.dev
   tasks:
-    - name: copy httpd.conf
+    - name: Copy a file.
       ansible.builtin.copy:
         src: files/httpd.conf
         dest: /etc/httpd/conf/httpd.conf
-    - name: restart httpd
+    - name: Restart a service.
       ansible.builtin.service:
         name: httpd
         state: restarted
