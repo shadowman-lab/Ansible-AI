@@ -1,6 +1,6 @@
 ---
-- name: Playbook to copy a file and restart a service
-  hosts: dynatrace.shadowman.dev
+- name: A simple playbook to copy a file and restart a service
+  hosts: dynatrace
   tasks:
     - name: Copy file
       ansible.builtin.copy:
