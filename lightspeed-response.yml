@@ -1,12 +1,12 @@
 ---
-- name: move a file to a different location and restart a service
+- name: copy httpd.conf to an Apache server
   hosts: dataylor-demo123.shadowman.dev
   tasks:
-    - name: copy a file
+    - name: Copy Apache configuration file
       ansible.builtin.copy:
         src: files/httpd.conf
         dest: /etc/httpd/conf/httpd.conf
-    - name: restart httpd
+    - name: Restart httpd service
       ansible.builtin.service:
         name: httpd
         state: restarted
