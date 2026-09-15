@@ -1,12 +1,12 @@
 ---
-- name: Restart HTTPD
-  hosts: dynatrace.shadowman.dev
+- name: move a file to a different location and restart a service
+  hosts: dataylor-demo123.shadowman.dev
   tasks:
-    - name: Copy file
+    - name: copy a file
       ansible.builtin.copy:
         src: files/httpd.conf
         dest: /etc/httpd/conf/httpd.conf
-    - name: Restart service
+    - name: restart httpd
       ansible.builtin.service:
         name: httpd
         state: restarted
