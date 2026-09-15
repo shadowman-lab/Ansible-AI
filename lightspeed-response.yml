@@ -1,12 +1,12 @@
 ---
-- name: copy httpd.conf file
-  hosts: dataylor-demo123.shadowman.dev
+- name: Playbook with one play
+  hosts: dataylor-demo456.shadowman.dev
   tasks:
-    - name: copy httpd.conf
+    - name: Copy files/httpd.conf to httpd.conf location
       ansible.builtin.copy:
         src: files/httpd.conf
         dest: /etc/httpd/conf/httpd.conf
-    - name: restart httpd
+    - name: Restart httpd service
       ansible.builtin.service:
         name: httpd
         state: restarted
