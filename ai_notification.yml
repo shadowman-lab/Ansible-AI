@@ -4,4 +4,4 @@
   gather_facts: false
 
   roles:
-    - ai_notifications
+    - ai_notification
