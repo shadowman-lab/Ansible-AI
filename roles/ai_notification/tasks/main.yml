@@ -43,6 +43,22 @@
   register: new_incident
   delegate_to: localhost
 
+- name: Send notification message via Mattermost
+  community.general.mattermost:
+    url: "{{ mattermost_url }}"
+    api_key: "{{ mattermost_api_key }}"
+    attachments:
+      - text: "! ALERT !"
+        color: '#ff00dd'
+        title: "{{ service_issue }} Issue"
+        fields:
+          - title: Issue
+            value: "{{ service_issue }} is not responding"
+            short: true
+          - title: Details
+            value: "ServiceNow Incident: {{ lookup('env', 'SN_HOST') }}nav_to.do?uri=incident.do?sysparm_query=number={{ new_incident.record.number }} has been opened. Remediation in progress for {{ service_issue }} not responding on {{ vm__name }}"
+            short: true
+
 - name: Display incident number
   ansible.builtin.debug:
     var: new_incident.record.number
