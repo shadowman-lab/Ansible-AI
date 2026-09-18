@@ -1,12 +1,7 @@
 ---
-- name: Playbook with one play
-  hosts: dataylor-demo456.shadowman.dev
+- name: Fail
+  hosts: localhost
   tasks:
-    - name: Copy files/httpd.conf to httpd.conf location
-      ansible.builtin.copy:
-        src: files/httpd.conf
-        dest: /etc/httpd/conf/httpd.conf
-    - name: Restart httpd service
-      ansible.builtin.service:
-        name: httpd
-        state: restarted
+    - name: Fail
+      ansible.builtin.fail:
+        msg: "Fail"
