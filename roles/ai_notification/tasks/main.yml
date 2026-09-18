@@ -56,7 +56,7 @@
             value: "{{ service_issue }} is not responding"
             short: true
           - title: Details
-            value: "ServiceNow Incident: {{ lookup('env', 'SN_HOST') }}nav_to.do?uri=incident.do?sysparm_query=number={{ new_incident.record.number }} has been opened. Remediation in progress for {{ service_issue }} not responding on {{ vm__name }}"
+            value: "ServiceNow Incident: {{ lookup('env', 'SN_HOST') }}nav_to.do?uri=incident.do?sysparm_query=number={{ new_incident.record.number }} has been opened. Remediation in progress for {{ service_issue }} not responding on {{ vm_name }}"
             short: true
 
 - name: Display incident number
