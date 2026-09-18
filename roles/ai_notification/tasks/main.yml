@@ -1,0 +1,58 @@
+---
+- name: Send notification message via Mattermost
+  community.general.mattermost:
+    url: "{{ mattermost_url }}"
+    api_key: "{{ mattermost_api_key }}"
+    attachments:
+      - text: "data model {{ model }}"
+        color: '#37a3a3'
+        title: AI Analysis Performed
+        fields:
+          - title: Ansible Prompt
+            value: "{{ prompt }} on logs: {{ service_log_output }}"
+            short: true
+          - title: AI Root Cause
+            value: "{{ rootCause | default('No response') }}"
+            short: true
+          - title: Remediation Steps
+            value: "{{ remediationSteps | default('No Steps') }}"
+            short: true
+
+- name: Write log output to EE
+  ansible.builtin.copy:
+    content: "{{ service_log_output }}"
+    dest: /tmp/logs.txt
+    mode: '0600'
+
+- name: Create an incident in ServiceNow
+  servicenow.itsm.incident:
+    state: new
+    description: A {{ service_issue }} incident has occurred on {{ vm_name }} with AI determined RCA {{ rootCause }}
+    short_description: A {{ service_issue }} incident has been detected on {{ vm_name }}
+    caller: admin
+    urgency: medium
+    impact: high
+    other:
+      u_vm_name: "{{ vm_name | default(omit) }}"
+      cmdb_ci: "{{ vm_name | default(omit) }}"
+      assignment_group: "{{ escalateTo | default(omit) }}"
+      comments: "Remediation Steps: {{ remediationSteps | default(omit) }}"
+    attachments:
+      - path: /tmp/logs.txt
+        name: "{{ service_issue | default(omit) }} logs"
+  register: new_incident
+  delegate_to: localhost
+
+- name: Display incident number
+  ansible.builtin.debug:
+    var: new_incident.record.number
+
+- name: Pass incident number
+  ansible.builtin.set_stats:
+    data:
+      ticket_number: "{{ new_incident.record.number }}"
+
+- name: Pass Incident Link to rest of workflow
+  ansible.builtin.set_stats:
+    data:
+      snow_incident_link: "ServiceNow Incident: {{ lookup('env', 'SN_HOST') }}nav_to.do?uri=incident.do?sysparm_query=number={{ new_incident.record.number }} "
