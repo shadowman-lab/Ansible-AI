@@ -1,7 +1,12 @@
 ---
-- name: Fail
-  hosts: localhost
+- name: copy httpd.conf file
+  hosts: dataylor-demo123.shadowman.dev
   tasks:
-    - name: Fail
-      ansible.builtin.fail:
-        msg: "Fail"
+    - name: copy httpd.conf to the proper location
+      ansible.builtin.copy:
+        src: files/httpd.conf
+        dest: /etc/httpd/conf/httpd.conf
+    - name: restart httpd
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
