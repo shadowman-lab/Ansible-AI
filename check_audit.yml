@@ -1,7 +1,7 @@
 ---
-- name: Check VM Status
+- name: Check VM Audit Logs
   hosts: "{{ vm_name }}"
   gather_facts: false
 
   roles:
-    - check_status
+    - check_audit
