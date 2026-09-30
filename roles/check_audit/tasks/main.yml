@@ -1,14 +1,14 @@
 ---
 - name: Retrieve last 20 nginx-related audit log entries
   ansible.builtin.shell:
-    cmd: set -o pipefail && grep {{ service_issue }} /var/log/audit/audit.log | tail -20
+    cmd: set -o pipefail && grep {{ check_audit_service_issue }} /var/log/audit/audit.log | tail -20
     executable: /bin/bash
-  register: service_logs
+  register: check_audit_service_logs
   changed_when: false
   failed_when: false
 
 - name: Set stats for next controller job
   ansible.builtin.set_stats:
     data:
-      service_log_output: "\"{{ service_logs.stdout }}\""
+      service_log_output: "\"{{ check_audit_service_logs.stdout }}\""
       max_tokens: 2000
