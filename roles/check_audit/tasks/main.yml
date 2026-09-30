@@ -1,7 +1,7 @@
 ---
 - name: Retrieve last 20 nginx-related audit log entries
   ansible.builtin.shell:
-    cmd: set -o pipefail && grep nginx /var/log/audit/audit.log | tail -20
+    cmd: set -o pipefail && grep {{ service_issue }} /var/log/audit/audit.log | tail -20
     executable: /bin/bash
   register: service_logs
   changed_when: false
