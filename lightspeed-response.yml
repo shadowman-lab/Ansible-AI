@@ -1,12 +1,7 @@
 ---
-- name: Playbook with random tests
-  hosts: datadog.shadowman.dev
+- name: Fail
+  hosts: localhost
   tasks:
-    - name: Copy file
-      ansible.builtin.copy:
-        src: files/httpd.conf
-        dest: /etc/httpd/conf/httpd.conf
-    - name: Restart httpd
-      ansible.builtin.service:
-        name: httpd
-        state: restarted
+    - name: Fail
+      ansible.builtin.fail:
+        msg: "Fail"
