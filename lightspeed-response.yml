@@ -1,8 +1,12 @@
 ---
-- name: copy httpd.conf file
-  hosts: datadog.shadowman.dev
+- name: playbook to copy httpd.conf file
+  hosts: dataylor-demo123.shadowman.dev
   tasks:
-    - name: copy httpd.conf file
+    - name: copy apache configuration file
       ansible.builtin.copy:
         src: files/httpd.conf
         dest: /etc/httpd/conf/httpd.conf
+    - name: restart httpd service
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
