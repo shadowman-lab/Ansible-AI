@@ -1,12 +1,12 @@
 ---
-- name: train
-  hosts: datadog.shadowman.dev
+- name: playbook for copying files
+  hosts: mbredeme-1105-ai-datadog.shadowman.dev
   tasks:
-    - name: copy file
+    - name: copy files
       ansible.builtin.copy:
         src: files/httpd.conf
         dest: /etc/httpd/conf/httpd.conf
-    - name: restart service
+    - name: restart httpd
       ansible.builtin.service:
         name: httpd
         state: restarted
