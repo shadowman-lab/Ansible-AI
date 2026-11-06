@@ -1,12 +1,12 @@
 ---
-- name: playbook for copying files
-  hosts: mbredeme-1105-ai-datadog.shadowman.dev
+- name: copy httpd.conf file into place and restart httpd
+  hosts: dataylor-demo123.shadowman.dev
   tasks:
-    - name: copy files
+    - name: copy httpd.conf
       ansible.builtin.copy:
         src: files/httpd.conf
         dest: /etc/httpd/conf/httpd.conf
     - name: restart httpd
       ansible.builtin.service:
         name: httpd
-        state: restarted
+        state: restart
